@@ -1,4 +1,3 @@
-const paragraph = document.createElement("p")
-paragraph.innerText = "testing"
+import initialiseWebsite from './website.js'
 
-document.getElementById("content").appendChild(paragraph)
+initialiseWebsite()
