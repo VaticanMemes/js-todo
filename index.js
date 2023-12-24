@@ -139,15 +139,31 @@ function createEditModal(id) {
     //// create note form
     // here's some code I copied from the createModalNoteForm
     const modalEditForm = document.createElement("form")
-    modalEditForm.setAttribute("onsubmit", "editModalSubmit(id)")
     const sectionsInHTML = []
     for (let i = 0; i < sectionList.length; i++) {
-        const newElement = String('<option value="' + sectionList[i] + '">' + sectionList[i] + '</options>')
-    sectionsInHTML.push(newElement)
+        var newElement = ""
+        if (sectionList[i] === noteList[id].section) {
+            newElement = String('<option value="' + sectionList[i] + '" selected>' + sectionList[i] + '</options>')
+        } else {
+            newElement = String('<option value="' + sectionList[i] + '">' + sectionList[i] + '</options>')
+        }
+        sectionsInHTML.push(newElement)
     }
-    const stringo = String('<label for="esect">Sections:</label><br><select id="esect" name="esect" value="' + noteList[id].section + '" required>' + sectionsInHTML.join("") + '</select>')
-    modalEditForm.innerHTML = '<hr><label for="enname">Note name:</label><br><input type="text" id="enname" name="enname" value="' + noteList[id].name + '" required><br><label for="edesc">Description:</label><br><input type="text" id="edesc" name="edesc" value="' + noteList[id].description + '" required><br><label for="edate">Due date:</label><br><input type="date" id="edate" value="' + noteList[id].date + '" name="edate" required><br><label for="epriority">Priority:</label><br><select id="epriority" name="epriority" value="' + noteList[id].priority + '" required><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select><br>' + stringo + '<br><br><input type="submit" id="edit-submit" value="submit"><br><br>'
+    const stringo = String('<label for="esect">Sections:</label><br><select id="esect" name="esect" required>' + sectionsInHTML.join("") + '</select>')
+    modalEditForm.innerHTML = '<hr><label for="enname">Note name:</label><br><input type="text" id="enname" name="enname" value="' + noteList[id].name + '" required><br><label for="edesc">Description:</label><br><input type="text" id="edesc" name="edesc" value="' + noteList[id].description + '" required><br><label for="edate">Due date:</label><br><input type="date" id="edate" value="' + noteList[id].date + '" name="edate" required><br><label for="epriority">Priority:</label><br><select id="epriority" name="epriority" value="' + noteList[id].priority + '" required><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select><br>' + stringo + '<br><br>'
     editModalBody.appendChild(modalEditForm)
+    const editModalButton = document.createElement("button")
+    editModalButton.setAttribute("id", "edit-submit")
+    editModalButton.setAttribute("value", "submit")
+    editModalButton.innerText = "submit"
+    // I know an event listener for a click is pretty ugly too
+    editModalButton.addEventListener("click", (evt) => {
+        evt.preventDefault()
+        editModalSubmit(id)
+    })
+    modalEditForm.appendChild(editModalButton)
+    modalEditForm.appendChild(document.createElement("br"))
+    modalEditForm.appendChild(document.createElement("br"))
     return editModal
 }
 
@@ -157,8 +173,11 @@ function editModalSubmit(id) {
     const edate = document.getElementById("edate").value
     const epriority = document.getElementById("epriority").value
     const enotesSection = document.getElementById("esect").value
-    noteList.splice(id, 1)
-    noteList.push(new note(enname, edesc, edate, epriority, enotesSection))
+    noteList[id].name = enname
+    noteList[id].description = edesc
+    noteList[id].date = edate
+    noteList[id].priority = epriority
+    noteList[id].section = enotesSection
     document.getElementById("enname").value = ''
     document.getElementById("edesc").value = ''
     document.getElementById("esect").value = ''
@@ -238,8 +257,13 @@ function createModalNoteForm() {
     modalNoteForm.setAttribute("onsubmit", "modalNoteFormSubmit()")
     const sectionsInHTML = []
     for (let i = 0; i < sectionList.length; i++) {
-        const newElement = String('<option value="' + sectionList[i] + '">' + sectionList[i] + '</options>')
-    sectionsInHTML.push(newElement)
+        var newElement = ""
+        if (sectionList[i] === document.querySelector("button.s-active").id) {
+            newElement = String('<option value="' + sectionList[i] + '" selected>' + sectionList[i] + '</options>')
+        } else {
+            newElement = String('<option value="' + sectionList[i] + '">' + sectionList[i] + '</options>')
+        }
+        sectionsInHTML.push(newElement)
     }
     const stringo = String('<label for="sect">Sections:</label><br><select id="sect" name="sect" selected="' + String(document.getElementsByClassName("s-active")[0].innerText) + '" required>' + sectionsInHTML.join("") + '</select>')
     modalNoteForm.innerHTML = '<hr><label for="nname">Note name:</label><br><input type="text" id="nname" name="nname" required><br><label for="desc">Description:</label><br><input type="text" id="desc" name="desc" required><br><label for="date">Due date:</label><br><input type="date" id="date" name="date" required><br><label for="priority">Priority:</label><br><select id="priority" name="priority" required><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select><br>' + stringo + '<br><br><input type="submit" id="note-submit" value="submit"><br><br>'
