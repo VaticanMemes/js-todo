@@ -50,4 +50,7 @@
     font-size: 1em;
     padding: 0px;
   }
-  
+
+.link-button.s-active {
+    font-weight: bold;
+}

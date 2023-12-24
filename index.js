@@ -1,12 +1,16 @@
 const content = document.getElementById("content")
 
-const noteList = []
-const sectionList = ["Home", "Harry", "Larry"]
+if (localStorage.getItem("noteList") === null) {
+    var noteList = []
+} else {
+    var noteList = JSON.parse(localStorage.getItem("noteList"))
+}
 
-noteList.push(new note("Wash dishes", "wash 'em clean", "2023-12-25", "high", "Home"))
-noteList.push(new note("penis", "Life", "2016-05-23", "medium", "Harry"))
-noteList.push(new note("Clean car", "wash the Ford clean", "2006-03-01", "low", "Home"))
-noteList.push(new note("Wash penis", "12 Rules for Life", "2017-05-23", "medium", "Harry"))
+if (localStorage.getItem("sectionList") === null) {
+    var sectionList = ["Home"]
+} else {
+    var sectionList = JSON.parse(localStorage.getItem("sectionList"))
+}
 
 loadPage()
 
@@ -19,12 +23,21 @@ function note(name, description, date, priority, section) {
 }
 
 function loadPage() {
+    sectionListTest()
+    localStorage.setItem("noteList", JSON.stringify(noteList))
+    localStorage.setItem("sectionList", JSON.stringify(sectionList))
     content.innerHTML = ""
     content.append(createHeader())
     createNewEventListersAfterHeader()
     content.append(createBody())
     content.append(createFoot())
     createEventListenersEnd()
+}
+
+function sectionListTest() {
+    if (sectionList.length === 0) {
+        sectionList.push("Home")
+    }
 }
 
 function createHeader() {
@@ -73,14 +86,22 @@ function createNewEventListersAfterHeader() {
     }
 
     // to check if none are active
-    const sActiveStatus = false
+    var sActiveStatus = false
     for (let i = 0; i < document.querySelectorAll("button.header-section-link").length; i++) {
         if (document.querySelectorAll("button.header-section-link")[i].classList.contains("s-active")) {
             sActiveStatus = true
         }
     }
+    var currentSectionExists = false
+    for (let i = 0; i < sectionList.length; i++) {
+        if (sectionList[i] === localStorage.getItem("currentSection")) {
+            currentSectionExists = true
+        }
+    }
     if (sActiveStatus === false) {
             if (localStorage.getItem("currentSection") === null) {
+                document.querySelectorAll("button.header-section-link")[0].classList.add("s-active")
+            } else if (!currentSectionExists) {
                 document.querySelectorAll("button.header-section-link")[0].classList.add("s-active")
             } else {
                 document.getElementById(localStorage.getItem("currentSection")).classList.add("s-active")
@@ -190,7 +211,33 @@ function createBody() {
     body.setAttribute("id", "body")
     body.appendChild(createModal())
     body.appendChild(createToDoElements())
+    body.appendChild(createDeleteSection())
     return body
+}
+
+function createDeleteSection() {
+    const deleteSection = document.createElement("button")
+    deleteSection.classList.add("link-button")
+    deleteSection.classList.add("delete-section-button")
+    deleteSection.setAttribute("id", "delete-section-button")
+    deleteSection.innerText = "Delete section"
+    deleteSection.addEventListener("click", () => {
+        // found on stack overflow
+        const index = sectionList.indexOf(document.querySelector("button.s-active").id);
+        if (index > -1) { // only splice array when item is found
+            sectionList.splice(index, 1); // 2nd parameter means remove one item only
+        }
+        // deleting notes of that section
+        for (let i = 0; i < noteList.length; i++) {
+            if (noteList[i].section === document.querySelector("button.s-active").id) {
+                noteList.splice(i, 1)
+            } else {
+                ++i
+            }
+        }
+        loadPage()
+    })
+    return deleteSection
 }
 
 function createToDoElements() {
